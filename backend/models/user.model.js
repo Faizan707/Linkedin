@@ -5,6 +5,7 @@ const userSchema = new Schema({
   email: { type: String, required: true, unique: true, trim: true },
   password: { type: String, required: true },
   friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], 
+  role:{type:String,enums:["Jobseeker","Recruiter"],default:"Jobseeker"}
 
 })
 

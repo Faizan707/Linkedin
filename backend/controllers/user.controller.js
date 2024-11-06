@@ -6,7 +6,7 @@ dotenv.config()
 const JWT_SECRET = process.env.JWT_SECRET
 
 export const createUser = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password,role } = req.body;
   if (!name || !email || !password) {
     return res.status(400).json({ message: "All fields are required" });
   }
@@ -24,6 +24,7 @@ export const createUser = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      role:role
     });
 
     await newUser.save();
@@ -34,14 +35,18 @@ export const createUser = async (req, res) => {
   }
 };
 
-export const getUsers = async(req,res) =>{
-    try{
-        const users = await User.find()
-        res.status(200).json(users)
-    }catch(error){
-        res.status(500).json({message:"Error fetching Users",error:error.message})
-    }
-}
+export const getUsers = async (req, res) => {
+  try {
+      const loggedInUserId = req.user.userId; 
+
+      const users = await User.find({ _id: { $ne: loggedInUserId } });
+
+      res.status(200).json(users);
+  } catch (error) {
+      res.status(500).json({ message: "Error fetching users", error: error.message });
+  }
+};
+
 
 export const loginUser = async(req,res) =>{
     const {email,password} = req.body
@@ -60,7 +65,7 @@ export const loginUser = async(req,res) =>{
             res.status(400).json({message:"Invalid password or email"})
             
         }
-        const token = jwt.sign({userId:user._id,userName:user.name,email:user.email},JWT_SECRET,{
+        const token = jwt.sign({userId:user._id,userName:user.name,email:user.email,role:user.role},JWT_SECRET,{
             expiresIn:"1h"
         })
         
