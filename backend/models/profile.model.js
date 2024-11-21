@@ -8,10 +8,7 @@ const profileSchema = new mongoose.Schema({
     education: String,
     university: String,
     currentPosition: String,
-    location: {
-        country: { type: String },
-        city: { type: String }
-    },
+    location: {type:String},
     company: { type: mongoose.SchemaTypes.ObjectId, ref: "Company" }
 });
 

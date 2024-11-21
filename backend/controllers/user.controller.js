@@ -37,15 +37,27 @@ export const createUser = async (req, res) => {
 
 export const getUsers = async (req, res) => {
   try {
-      const loggedInUserId = req.user.userId; 
+    const loggedInUserId = req.user.userId;
 
-      const users = await User.find({ _id: { $ne: loggedInUserId } });
+    const loggedInUser = await User.findById(loggedInUserId).populate("friends", "_id name");
 
-      res.status(200).json(users);
+    const friendIds = new Set(loggedInUser.friends.map(friend => friend._id.toString()));
+
+    const users = await User.find({ _id: { $ne: loggedInUserId } })
+      .populate('friends', '_id name') 
+      .lean();  
+
+    const usersWithFriendStatus = users.map(user => ({
+      ...user,
+      isFriend: friendIds.has(user._id.toString()),
+    }));
+
+    res.status(200).json(usersWithFriendStatus);
   } catch (error) {
-      res.status(500).json({ message: "Error fetching users", error: error.message });
+    res.status(500).json({ message: "Error fetching users", error: error.message });
   }
 };
+
 
 
 export const loginUser = async(req,res) =>{
@@ -77,4 +89,33 @@ export const loginUser = async(req,res) =>{
     }
     
 }
+export const updateUserRole = async (req, res) => {
+  const { userId } = req.user.userId;
+  const { newRole } = req.body;
+
+  if (!newRole) {
+    return res.status(400).json({ message: "Role is required" });
+  }
+
+  const validRoles = ["user", "recruiter",]; 
+  if (!validRoles.includes(newRole)) {
+    return res.status(400).json({ message: "Invalid role" });
+  }
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.role = newRole;
+    await user.save();
+
+    res.status(200).json({ message: "Role updated successfully", role: newRole });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
 

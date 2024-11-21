@@ -2,7 +2,7 @@ import Profile from "../models/profile.model.js";
 import Company from "../models/company.model.js";
 
 export const createProfile = async (req, res) => {
-    const { about, education, university, currentPosition, location, companyId } = req.body;
+    const { about, education, university, currentPosition, location, CompanyName } = req.body;
     let profileImage, coverImage;
 
     try {
@@ -15,7 +15,7 @@ export const createProfile = async (req, res) => {
             coverImage = req.files.coverImage[0].buffer;
         }
 
-        const company = await Company.findOne({ _id: companyId }).populate("companyName");
+        const company = await Company.findOne({ companyName: CompanyName });
         if (!company) {
             return res.status(404).json({ message: "Company not found" });
         }
@@ -29,7 +29,7 @@ export const createProfile = async (req, res) => {
             university,
             currentPosition,
             location,
-            company: companyId
+            company: CompanyName
         });
 
         await newProfile.save();

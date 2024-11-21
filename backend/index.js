@@ -3,6 +3,7 @@ import { databaseConnection } from "./config/db.js"
 import UserRoutes from "./routes/user.routes.js"
 import RequestRoutes from "./routes/request.routes.js"
 import CompanyRoutes from "./routes/company.routes.js"
+import ProfileRoutes from "./routes/profile.routes.js"
 import cors from "cors"
 import dotenv from "dotenv"
 
@@ -17,6 +18,7 @@ app.use('/uploads', express.static('uploads'));
 app.use("/api/",UserRoutes)
 app.use("/api/",RequestRoutes)
 app.use("/api/",CompanyRoutes)
+app.use("/api/",ProfileRoutes)
 databaseConnection()
 
 app.listen(PORT,()=>{
